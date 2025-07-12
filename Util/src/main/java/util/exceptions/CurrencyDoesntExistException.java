@@ -1,0 +1,33 @@
+package util.exceptions;
+
+import java.util.List;
+
+public class CurrencyDoesntExistException extends RuntimeException {
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	
+	private List<String> currencies;
+
+	public CurrencyDoesntExistException() {
+	}
+	
+	public CurrencyDoesntExistException(String message, List<String> currencies) {
+		//we don't have message defined ourselves, but RuntimeException has it so we call super in order to get it
+		super(message);
+		this.currencies = currencies;
+	}
+
+	public List<String> getCurrencies() {
+		return currencies;
+	}
+
+	public void setCurrencies(List<String> currencies) {
+		this.currencies = currencies;
+	}
+	
+	
+
+}
