@@ -12,4 +12,7 @@ public interface CurrencyConversionService {
 
 	@GetMapping("/currency-conversion")
 	ResponseEntity<?> getConversion(@RequestParam String from, @RequestParam String to, @RequestParam BigDecimal quantity);
-}
+	
+	@GetMapping("/currency-conversion-feign")
+	ResponseEntity<?> getConversionFeign(@RequestParam String from, @RequestParam String to, @RequestParam BigDecimal quantity);
+} 

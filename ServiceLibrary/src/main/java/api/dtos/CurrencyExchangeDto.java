@@ -7,6 +7,15 @@ public class CurrencyExchangeDto {
 	private String from;
 	private String to;
 	private BigDecimal exchangeRate;
+	private String port;
+
+	public String getPort() {
+		return port;
+	}
+
+	public void setPort(String port) {
+		this.port = port;
+	}
 
 	public CurrencyExchangeDto() {
 
