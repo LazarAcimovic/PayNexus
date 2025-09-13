@@ -11,8 +11,8 @@
 	<groupId>soas.users-service</groupId>
 	<artifactId>users-service</artifactId>
 	<version>1.0.0</version>
-	<name>UsersService</name>
-	<description>authentification</description>
+	<name>UserService</name>
+	<description>Service containng User data necessary for authentication</description>
 	<url/>
 	<licenses>
 		<license/>
@@ -43,13 +43,13 @@
 			<groupId>org.springframework.cloud</groupId>
 			<artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
 		</dependency>
-		
+
 		<dependency>
-		
-			<groupId>soas.service-library</groupId>
+		<groupId>soas.service-library</groupId>
 			<artifactId>service-library</artifactId>
 			<version>1.0.0</version>
 		</dependency>
+
 
 		<dependency>
 			<groupId>org.springframework.boot</groupId>

@@ -29,7 +29,7 @@ public class UserModel implements Serializable{
 	@Column(nullable = false)
 	private String password;
 	
-	@Column(nullable = false, columnDefinition = "VARCHAR(10) check(role in ('ADMIN', 'USER'))")
+	@Column(nullable = false, columnDefinition = "VARCHAR(10) check(role in ('ADMIN', 'USER', 'OWNER'))")
 	private String role;
 	
 	public int getId() {
