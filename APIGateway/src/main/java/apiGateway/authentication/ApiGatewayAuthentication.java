@@ -5,6 +5,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
+import org.springframework.security.config.web.server.SecurityWebFiltersOrder;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
 import org.springframework.security.core.userdetails.ReactiveUserDetailsService;
 import org.springframework.security.core.userdetails.User;
@@ -23,34 +24,48 @@ public class ApiGatewayAuthentication {
 		http
 		.csrf(csrf -> csrf.disable())
 		.authorizeExchange(exchange -> exchange
-				.pathMatchers(HttpMethod.POST).hasRole("ADMIN")
+                .pathMatchers(HttpMethod.POST, "/users/newOwner").permitAll()         
+                .pathMatchers(HttpMethod.POST, "/users/newAdmin").hasRole("OWNER")
+                .pathMatchers(HttpMethod.POST, "/users/newUser").hasAnyRole("OWNER", "ADMIN")
+                .pathMatchers(HttpMethod.DELETE, "/users").hasRole("OWNER")
+                .pathMatchers(HttpMethod.PUT, "/users").hasAnyRole("OWNER", "ADMIN")
+                .pathMatchers(HttpMethod.GET, "/users").hasAnyRole("OWNER", "ADMIN")
 				.pathMatchers("/currency-exchange").permitAll()
 				.pathMatchers("/currency-conversion").hasRole("USER")
-				.pathMatchers("/users").hasRole("ADMIN")
-				).httpBasic(Customizer.withDefaults());
+				.pathMatchers("/trade-service").hasRole("USER")
+				.pathMatchers("/crypto-conversion").hasRole("USER")
+				
+				
+				
+				
+				
+				
+		)
+		.addFilterAfter(new AddUserRoleHeaderWebFilter(), SecurityWebFiltersOrder.AUTHENTICATION)
+		.httpBasic(Customizer.withDefaults());
 		
 		return http.build();
 	}
 	
 	@Bean
 	ReactiveUserDetailsService reactiveUserDetailsService(WebClient.Builder webClientBuilder, BCryptPasswordEncoder encoder) {
-		WebClient client = webClientBuilder.baseUrl("http://localhost:8770").build();
-		
-		return user -> client.get()
-				.uri(uriBuilder -> uriBuilder
-						.path("/users/email")
-						.queryParam("email", user)
-						.build()
-				)
-				.retrieve()
-				.bodyToMono(UserDto.class)
-				.map(dto -> User.withUsername(dto.getEmail())
-						.password(encoder.encode(dto.getPassword()))
-						.roles(dto.getRole())
-						.build()
-				);
-			
-		}
+	    WebClient client = webClientBuilder.baseUrl("http://localhost:8770").build();
+	    
+	    return user -> client.get()
+	            .uri(uriBuilder -> uriBuilder
+	                    .path("/users/email")
+	                    .queryParam("email", user)
+	                    .build()
+	            )
+	            .retrieve()
+	            .bodyToMono(UserDto.class)
+	            .map(dto -> User.withUsername(dto.getEmail())
+	                    .password(encoder.encode(dto.getPassword())) // zatvorena zagrada ovde
+	                    .roles(dto.getRole())
+	                    .build()
+	            );
+	}
+
 	
 	@Bean
 	BCryptPasswordEncoder getEncoder() {
