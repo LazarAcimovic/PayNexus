@@ -1,3 +1,4 @@
+
 package apiGateway.authentication;
 
 import java.util.stream.Collectors;
@@ -21,9 +22,13 @@ public class AddUserRoleHeaderWebFilter implements org.springframework.web.serve
                             .map(Object::toString)
                             .collect(Collectors.joining(","));
                     
-                  
+                    String email = authentication.getName(); 
+                    
                     ServerWebExchange mutatedExchange = exchange.mutate()
-                            .request(exchange.getRequest().mutate().header("X-User-Roles", roles).build())
+                            .request(exchange.getRequest().mutate()
+                                    .header("X-User-Roles", roles)
+                                    .header("X-User-Email", email) 
+                                    .build())
                             .build();
 
                     return chain.filter(mutatedExchange);

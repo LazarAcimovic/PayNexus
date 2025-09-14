@@ -24,16 +24,23 @@ public class ApiGatewayAuthentication {
 		http
 		.csrf(csrf -> csrf.disable())
 		.authorizeExchange(exchange -> exchange
-                .pathMatchers(HttpMethod.POST, "/users/newOwner").permitAll()         
-                .pathMatchers(HttpMethod.POST, "/users/newAdmin").hasRole("OWNER")
-                .pathMatchers(HttpMethod.POST, "/users/newUser").hasAnyRole("OWNER", "ADMIN")
-                .pathMatchers(HttpMethod.DELETE, "/users").hasRole("OWNER")
-                .pathMatchers(HttpMethod.PUT, "/users").hasAnyRole("OWNER", "ADMIN")
-                .pathMatchers(HttpMethod.GET, "/users").hasAnyRole("OWNER", "ADMIN")
+				.pathMatchers("/bank-accounts/getAllBankAccounts").hasRole("ADMIN")
+				.pathMatchers("/bank-accounts/email").hasRole("USER") 
+				.pathMatchers("/bank-accounts/delete").hasRole("USER") 
+				.pathMatchers("/bank-accounts/new").hasRole("ADMIN")
+				.pathMatchers("/bank-accounts/update").hasRole("ADMIN")
+				
+				.pathMatchers(HttpMethod.POST, "/users/newOwner").permitAll()
+				.pathMatchers(HttpMethod.POST, "/users/newAdmin").hasRole("OWNER")
+				.pathMatchers(HttpMethod.POST, "/users/newUser").hasAnyRole("OWNER", "ADMIN")
+				.pathMatchers(HttpMethod.DELETE, "/users").hasRole("OWNER")
+				.pathMatchers(HttpMethod.PUT, "/users").hasAnyRole("OWNER", "ADMIN")
+				.pathMatchers(HttpMethod.GET, "/users").hasAnyRole("OWNER", "ADMIN")
+
 				.pathMatchers("/currency-exchange").permitAll()
 				.pathMatchers("/currency-conversion").hasRole("USER")
 				.pathMatchers("/trade-service").hasRole("USER")
-				.pathMatchers("/crypto-conversion").hasRole("USER")
+				
 				
 				
 				
