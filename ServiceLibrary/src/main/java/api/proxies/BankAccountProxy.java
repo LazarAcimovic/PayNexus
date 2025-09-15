@@ -3,8 +3,11 @@ package api.proxies;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import api.dtos.BankAccountDto;
@@ -17,4 +20,13 @@ public interface BankAccountProxy {
 
     @DeleteMapping("/bank-accounts/delete")
     ResponseEntity<?> deleteBankAccount(@RequestParam String email);
+    
+    @PutMapping("/bank-accounts/update/user")
+    ResponseEntity<BankAccountDto> updateUserBankAccountByEmail(
+        @RequestBody BankAccountDto dto,
+        @RequestHeader("X-User-Email") String userEmail
+    );
+    
+    @GetMapping("/bank-accounts/email")
+    BankAccountDto getBankAccountByEmail(@RequestHeader("X-User-Email") String userEmail);
 }

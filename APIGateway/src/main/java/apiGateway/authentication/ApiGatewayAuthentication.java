@@ -29,6 +29,7 @@ public class ApiGatewayAuthentication {
 				.pathMatchers("/bank-accounts/delete").hasRole("USER") 
 				.pathMatchers("/bank-accounts/new").hasRole("ADMIN")
 				.pathMatchers("/bank-accounts/update").hasRole("ADMIN")
+				.pathMatchers("/bank-accounts/update/user").hasRole("USER")
 				
 				.pathMatchers(HttpMethod.POST, "/users/newOwner").permitAll()
 				.pathMatchers(HttpMethod.POST, "/users/newAdmin").hasRole("OWNER")
@@ -38,7 +39,7 @@ public class ApiGatewayAuthentication {
 				.pathMatchers(HttpMethod.GET, "/users").hasAnyRole("OWNER", "ADMIN")
 
 				.pathMatchers("/currency-exchange").permitAll()
-				.pathMatchers("/currency-conversion").hasRole("USER")
+				.pathMatchers("/currency-conversion-feign").hasRole("USER")
 				.pathMatchers("/trade-service").hasRole("USER")
 				
 				

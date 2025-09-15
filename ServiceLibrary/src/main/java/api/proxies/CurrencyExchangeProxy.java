@@ -10,8 +10,9 @@ import api.dtos.CurrencyExchangeDto;
 @FeignClient("currency-exchange")
 public interface CurrencyExchangeProxy {
 	@GetMapping("/currency-exchange")
-	//getCurrencyExchange getExchangeFeign ne mora isti naziv metode
-	//mora da se podudara endpoint, tip http zahteva i parametri metode, ne i naziv metode
-	//isto tako možemo reći da vraćamo currencyExchangeDTO umesto ?
+	// getCurrencyExchange and getExchangeFeign don’t need to have the same method name  
+	// the endpoint, HTTP request type, and method parameters must match, but not the method name  
+	// likewise, we can say that we return currencyExchangeDTO instead of ?
+
 	ResponseEntity<CurrencyExchangeDto> getExchangeFeign(@RequestParam String from, @RequestParam String to);
 }

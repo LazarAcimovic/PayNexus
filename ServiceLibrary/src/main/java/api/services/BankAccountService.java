@@ -28,5 +28,11 @@ public interface BankAccountService {
     
     @PutMapping("/update")
     ResponseEntity<?> updateBankAccount(@RequestBody BankAccountDto dto);
+    
+    @PutMapping("/update/user")
+    ResponseEntity<?> updateUserBankAccountByEmail(
+        @RequestBody BankAccountDto dto,
+        @RequestHeader("X-User-Email") String userEmail
+    );
 
 }
