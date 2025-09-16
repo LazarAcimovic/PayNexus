@@ -28,5 +28,5 @@ public interface BankAccountProxy {
     );
     
     @GetMapping("/bank-accounts/email")
-    BankAccountDto getBankAccountByEmail(@RequestHeader("X-User-Email") String userEmail);
+    ResponseEntity<BankAccountDto> getBankAccountByEmail(@RequestHeader("X-User-Email") String userEmail);
 }

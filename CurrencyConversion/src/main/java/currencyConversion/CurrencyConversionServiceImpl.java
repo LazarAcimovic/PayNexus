@@ -51,7 +51,14 @@ public class CurrencyConversionServiceImpl implements CurrencyConversionService 
 	    @RequestHeader("X-User-Email") String userEmail
 	) {
 	    // getting user bank account state
-	    BankAccountDto userAccount = bankAccountProxy.getBankAccountByEmail(userEmail);
+		ResponseEntity<BankAccountDto> bankAccountResponse = bankAccountProxy.getBankAccountByEmail(userEmail);
+		
+		if (!bankAccountResponse.getStatusCode().is2xxSuccessful()) {
+		    return ResponseEntity.status(bankAccountResponse.getStatusCode())
+		        .body("Failed to get bank account details.");
+		}
+		
+		BankAccountDto userAccount = bankAccountResponse.getBody();
 
 	    if (userAccount == null) {
 	        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Bank account not found for user.");
