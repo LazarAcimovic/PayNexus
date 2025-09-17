@@ -1,26 +1,26 @@
 package api.dtos;
 
-import java.io.Serializable;
+
 import java.math.BigDecimal;
 
-public class CryptoWalletDto implements Serializable {
+public class CryptoWalletDto  {
 
-    private static final long serialVersionUID = 1L;
+
 
     private String email;
-    private BigDecimal btc;
-    private BigDecimal eth;
-    private BigDecimal xrp;
-    private BigDecimal ltc;
+    private BigDecimal BTC;
+    private BigDecimal ETH;
+    private BigDecimal XRP;
+    private BigDecimal LTC;
 
     public CryptoWalletDto() {}
 
-    public CryptoWalletDto(String email, BigDecimal btc, BigDecimal eth, BigDecimal xrp, BigDecimal ltc) {
+    public CryptoWalletDto(String email, BigDecimal BTC, BigDecimal ETH, BigDecimal XRP, BigDecimal LTC) {
         this.email = email;
-        this.btc = btc;
-        this.eth = eth;
-        this.xrp = xrp;
-        this.ltc = ltc;
+        this.BTC = BTC;
+        this.ETH = ETH;
+        this.XRP = XRP;
+        this.LTC = LTC;
     }
 
     public String getEmail() {
@@ -31,35 +31,35 @@ public class CryptoWalletDto implements Serializable {
         this.email = email;
     }
 
-    public BigDecimal getBtc() {
-        return btc;
+    public BigDecimal getBTC() {
+        return BTC;
     }
 
-    public void setBtc(BigDecimal btc) {
-        this.btc = btc;
+    public void setBTC(BigDecimal BTC) {
+        this.BTC = BTC;
     }
 
-    public BigDecimal getEth() {
-        return eth;
+    public BigDecimal getETH() {
+        return ETH;
     }
 
-    public void setEth(BigDecimal eth) {
-        this.eth = eth;
+    public void setETH(BigDecimal ETH) {
+        this.ETH = ETH;
     }
 
-    public BigDecimal getXrp() {
-        return xrp;
+    public BigDecimal getXRP() {
+        return XRP;
     }
 
-    public void setXrp(BigDecimal xrp) {
-        this.xrp = xrp;
+    public void setXRP(BigDecimal XRP) {
+        this.XRP = XRP;
     }
 
-    public BigDecimal getLtc() {
-        return ltc;
+    public BigDecimal getLTC() {
+        return LTC;
     }
 
-    public void setLtc(BigDecimal ltc) {
-        this.ltc = ltc;
+    public void setLTC(BigDecimal LTC) {
+        this.LTC = LTC;
     }
 }
