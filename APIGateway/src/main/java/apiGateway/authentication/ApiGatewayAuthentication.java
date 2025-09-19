@@ -40,7 +40,7 @@ public class ApiGatewayAuthentication {
 
 				.pathMatchers("/currency-exchange").permitAll()
 				.pathMatchers("/currency-conversion-feign").hasRole("USER")
-				.pathMatchers("/trade-service").hasRole("USER")
+
 				
 				
 				.pathMatchers("/crypto-wallets/new").hasRole("ADMIN")
@@ -52,7 +52,7 @@ public class ApiGatewayAuthentication {
 				.pathMatchers("/crypto-exchange").permitAll()
 				.pathMatchers("/crypto-conversion/convert").hasRole("USER")
 				
-				
+				.pathMatchers("/trade-service/trade").hasRole("USER")
 				
 				
 		)
