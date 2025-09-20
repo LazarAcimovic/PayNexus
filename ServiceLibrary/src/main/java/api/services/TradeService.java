@@ -12,10 +12,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 
 
-@RequestMapping("/trade-service")
+
 public interface TradeService {
 
-    @GetMapping("/trade")
+    @GetMapping("/trade-service")
     ResponseEntity<?> trade(
         @RequestParam String from,
         @RequestParam String to,

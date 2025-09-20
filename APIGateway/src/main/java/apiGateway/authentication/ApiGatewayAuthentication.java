@@ -26,33 +26,37 @@ public class ApiGatewayAuthentication {
 		.authorizeExchange(exchange -> exchange
 				.pathMatchers("/bank-accounts/getAllBankAccounts").hasRole("ADMIN")
 				.pathMatchers("/bank-accounts/email").hasRole("USER") 
-				.pathMatchers("/bank-accounts/delete").hasRole("USER") 
+				.pathMatchers("/bank-accounts/delete").hasRole("OWNER")  //we're allowing owner because when deleting user, it automatically needs to delete user account as well
 				.pathMatchers("/bank-accounts/new").hasRole("ADMIN")
 				.pathMatchers("/bank-accounts/update").hasRole("ADMIN")
 				.pathMatchers("/bank-accounts/update/user").hasRole("USER")
 				
-				.pathMatchers(HttpMethod.POST, "/users/newOwner").permitAll()
+				//.pathMatchers(HttpMethod.POST, "/users/newOwner").permitAll() for testing purposes
 				.pathMatchers(HttpMethod.POST, "/users/newAdmin").hasRole("OWNER")
 				.pathMatchers(HttpMethod.POST, "/users/newUser").hasAnyRole("OWNER", "ADMIN")
 				.pathMatchers(HttpMethod.DELETE, "/users").hasRole("OWNER")
 				.pathMatchers(HttpMethod.PUT, "/users").hasAnyRole("OWNER", "ADMIN")
 				.pathMatchers(HttpMethod.GET, "/users").hasAnyRole("OWNER", "ADMIN")
+				.pathMatchers(HttpMethod.GET, "/users/email").permitAll()
+				
+				
 
 				.pathMatchers("/currency-exchange").permitAll()
+				.pathMatchers("/currency-conversion").hasRole("USER")
 				.pathMatchers("/currency-conversion-feign").hasRole("USER")
 
 				
 				
 				.pathMatchers("/crypto-wallets/new").hasRole("ADMIN")
 				.pathMatchers("/crypto-wallets/update").hasRole("ADMIN")
-				.pathMatchers("/crypto-wallets/delete").hasRole("ADMIN")
+				.pathMatchers("/crypto-wallets/delete").hasRole("OWNER") //similar reason as bank-accounts/delete
 				.pathMatchers("/crypto-wallets/all").hasRole("ADMIN")
 				.pathMatchers("/crypto-wallets/email").hasRole("USER")
 				
 				.pathMatchers("/crypto-exchange").permitAll()
-				.pathMatchers("/crypto-conversion/convert").hasRole("USER")
+				.pathMatchers("/crypto-conversion").hasRole("USER")
 				
-				.pathMatchers("/trade-service/trade").hasRole("USER")
+				.pathMatchers("/trade-service").hasRole("USER")
 				
 				
 		)

@@ -9,21 +9,21 @@ public class TradeResponseDto {
     public TradeResponseDto() {
     }
 
-    // Konstruktor za razmenu FIAT -> CRYPTO
+ // Constructor for FIAT -> CRYPTO exchange
     public TradeResponseDto(String transactionMessage, CryptoWalletDto updatedCryptoWallet) {
         this.transactionMessage = transactionMessage;
         this.updatedCryptoWallet = updatedCryptoWallet;
-        this.updatedBankAccount = null; // Postavljamo na null da ne bi bilo duplih informacija
+        this.updatedBankAccount = null; // We're setting on null because of the project specification
     }
 
-    // Konstruktor za razmenu CRYPTO -> FIAT
+ // Constructor for CRYPTO -> FIAT exchange
     public TradeResponseDto(String transactionMessage, BankAccountDto updatedBankAccount) {
         this.transactionMessage = transactionMessage;
         this.updatedBankAccount = updatedBankAccount;
-        this.updatedCryptoWallet = null; // Postavljamo na null
+        this.updatedCryptoWallet = null; // vice versa from TradeResponseDto
     }
 
-    // Getteri i setteri
+    // Getters and Setters
     public String getTransactionMessage() {
         return transactionMessage;
     }

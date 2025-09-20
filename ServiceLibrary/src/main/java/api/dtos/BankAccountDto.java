@@ -4,80 +4,80 @@ import java.math.BigDecimal;
 
 public class BankAccountDto {
 
-	private String email;
-	private BigDecimal usd;
-	private BigDecimal eur;
-	private BigDecimal gbp;
-	private BigDecimal chf;
-	private BigDecimal rsd;
+    private String email;
+    private BigDecimal USD;
+    private BigDecimal EUR;
+    private BigDecimal GBP;
+    private BigDecimal CHF;
+    private BigDecimal RSD;
 
-	public BankAccountDto() {
-		this.usd = BigDecimal.ZERO;
-		this.eur = BigDecimal.ZERO;
-		this.gbp = BigDecimal.ZERO;
-		this.chf = BigDecimal.ZERO;
-		this.rsd = BigDecimal.ZERO;
-	}
+    public BankAccountDto() {
+        this.USD = BigDecimal.ZERO;
+        this.EUR = BigDecimal.ZERO;
+        this.GBP = BigDecimal.ZERO;
+        this.CHF = BigDecimal.ZERO;
+        this.RSD = BigDecimal.ZERO;
+    }
 
-	public BankAccountDto(String email) {
-		this();
-		this.email = email;
-	}
+    public BankAccountDto(String email) {
+        this();
+        this.email = email;
+    }
 
-	public BankAccountDto(String email, BigDecimal usd, BigDecimal eur, BigDecimal gbp, BigDecimal chf, BigDecimal rsd) {
-		this.email = email;
-		this.usd = usd;
-		this.eur = eur;
-		this.gbp = gbp;
-		this.chf = chf;
-		this.rsd = rsd;
-	}
+    public BankAccountDto(String email, BigDecimal USD, BigDecimal EUR, BigDecimal GBP, BigDecimal CHF, BigDecimal RSD) {
+        this.email = email;
+        this.USD = USD;
+        this.EUR = EUR;
+        this.GBP = GBP;
+        this.CHF = CHF;
+        this.RSD = RSD;
+    }
 
-	public String getEmail() {
-		return email;
-	}
+    public String getEmail() {
+        return email;
+    }
 
-	public void setEmail(String email) {
-		this.email = email;
-	}
+    public void setEmail(String email) {
+        this.email = email;
+    }
 
-	public BigDecimal getUsd() {
-		return usd;
-	}
+    public BigDecimal getUsd() {
+        return USD;
+    }
 
-	public void setUsd(BigDecimal usd) {
-		this.usd = usd;
-	}
+    public void setUsd(BigDecimal USD) {
+        this.USD = USD;
+    }
 
-	public BigDecimal getEur() {
-		return eur;
-	}
+    public BigDecimal getEur() {
+        return EUR;
+    }
 
-	public void setEur(BigDecimal eur) {
-		this.eur = eur;
-	}
+    public void setEur(BigDecimal EUR) {
+        this.EUR = EUR;
+    }
 
-	public BigDecimal getGbp() {
-		return gbp;
-	}
+    public BigDecimal getGbp() {
+        return GBP;
+    }
 
-	public void setGbp(BigDecimal gbp) {
-		this.gbp = gbp;
-	}
+    public void setGbp(BigDecimal GBP) {
+        this.GBP = GBP;
+    }
 
-	public BigDecimal getChf() {
-		return chf;
-	}
+    public BigDecimal getChf() {
+        return CHF;
+    }
 
-	public void setChf(BigDecimal chf) {
-		this.chf = chf;
-	}
+    public void setChf(BigDecimal CHF) {
+        this.CHF = CHF;
+    }
 
-	public BigDecimal getRsd() {
-		return rsd;
-	}
+    public BigDecimal getRsd() {
+        return RSD;
+    }
 
-	public void setRsd(BigDecimal rsd) {
-		this.rsd = rsd;
-	}
+    public void setRsd(BigDecimal RSD) {
+        this.RSD = RSD;
+    }
 }

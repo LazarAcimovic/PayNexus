@@ -19,6 +19,10 @@ public class NoDataFoundException extends RuntimeException {
 		super(message);
 		this.currencies = currencies;
 	}
+	
+    public NoDataFoundException(String message) {
+        super(message);
+    }
 
 	public List<String> getCurrencies() {
 		return currencies;

@@ -3,11 +3,13 @@ package api.dtos;
 
 import java.math.BigDecimal;
 
+
 public class CryptoWalletDto  {
 
 
 
     private String email;
+    
     private BigDecimal BTC;
     private BigDecimal ETH;
     private BigDecimal XRP;

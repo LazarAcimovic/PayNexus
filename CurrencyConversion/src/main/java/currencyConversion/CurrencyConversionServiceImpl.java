@@ -1,6 +1,7 @@
 package currencyConversion;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +23,7 @@ import io.github.resilience4j.circuitbreaker.CallNotPermittedException;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import io.github.resilience4j.retry.Retry;
 import io.github.resilience4j.retry.RetryRegistry;
+import util.exceptions.CurrencyDoesntExistException;
 import util.exceptions.InvalidQuantityException;
 
 @RestController
@@ -65,17 +67,17 @@ public class CurrencyConversionServiceImpl implements CurrencyConversionService 
 	    }
 	    
 	    // current state from from value
-	    BigDecimal fromAmount = getCurrencyAmount(userAccount, from);
+	    BigDecimal fromAmount = getCurrencyAmount(userAccount, from.toUpperCase());
 
-	    
+	   // System.out.println(from);
 	    if (fromAmount == null || fromAmount.compareTo(quantity) < 0) {
 	        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
-	            "Insufficient funds for exchange. Available " + from + ": " + fromAmount
+	            "Insufficient funds for exchange. Available " + from.toUpperCase() + ": " + fromAmount
 	        );
 	    }
 
 	    // getting course
-	    ResponseEntity<CurrencyExchangeDto> exchangeResponse = proxy.getExchangeFeign(from, to);
+	    ResponseEntity<CurrencyExchangeDto> exchangeResponse = proxy.getExchangeFeign(from.toUpperCase(), to.toUpperCase());
 	    CurrencyExchangeDto exchangeDto = exchangeResponse.getBody();
 	    BigDecimal conversionRate = exchangeDto.getExchangeRate();
 
@@ -84,19 +86,19 @@ public class CurrencyConversionServiceImpl implements CurrencyConversionService 
 	    BigDecimal convertedToAmount = quantity.multiply(conversionRate);
 
 	    // getting currently state from to value
-	    BigDecimal toAmount = getCurrencyAmount(userAccount, to);
+	    BigDecimal toAmount = getCurrencyAmount(userAccount, to.toUpperCase());
 	    BigDecimal newToAmount = toAmount.add(convertedToAmount);
 
 	    // updating user account
-	    setCurrencyAmount(userAccount, from, newFromAmount);
-	    setCurrencyAmount(userAccount, to, newToAmount);
+	    setCurrencyAmount(userAccount, from.toUpperCase(), newFromAmount);
+	    setCurrencyAmount(userAccount, to.toUpperCase(), newToAmount);
 
 	    
 	    bankAccountProxy.updateUserBankAccountByEmail(userAccount, userEmail);
 
 	   
 	    String message = String.format("Successful transaction: Exchanged %s: %s for %s: %s",
-	        from, quantity, to, convertedToAmount);
+	        from.toUpperCase(), quantity, to, convertedToAmount);
 
 	    return ResponseEntity.ok(message);
 	}
@@ -128,7 +130,12 @@ public class CurrencyConversionServiceImpl implements CurrencyConversionService 
 	        case "GBP" -> dto.getGbp();
 	        case "CHF" -> dto.getChf();
 	        case "RSD" -> dto.getRsd();
-	        default -> null;
+	        default -> {
+	            throw new CurrencyDoesntExistException(
+	                "Currency '" + currency + "' doesn't exist.",
+	                List.of("USD", "EUR", "GBP", "CHF", "RSD")
+	            );
+	        }
 	    };
 	}
 
