@@ -11,7 +11,6 @@ Sve funkcionalnosti dostupne preko API Gateway-a na portu 8765:
 
 | Endpoint | Method | Autorizacija | Opis |
 |----------|--------|--------------|------|
-| /users/newOwner | POST | OWNER | Kreira korisnika sa ulogom OWNER |
 | /users/newAdmin | POST | OWNER | Kreira korisnika sa ulogom ADMIN |
 | /users/newUser | POST | OWNER, ADMIN | Kreira korisnika sa ulogom USER |
 | /users | GET | OWNER, ADMIN | Prikaz svih korisnika |
@@ -29,6 +28,9 @@ Sve funkcionalnosti dostupne preko API Gateway-a na portu 8765:
 | /bank-accounts/delete | DELETE | OWNER | Automatsko brisanje korisnikovog računa (kada se obriše korisnik) |
 | /bank-accounts/new | POST | ADMIN | Dodavanje bankovnog računa |
 | /bank-accounts/update | PUT | ADMIN | Ažuriranje bankovnog računa |
+| //bank-accounts/update/user | PUT | USER | Ažuriranje bankovnog računa (automatski se poziva kod trade service |
+
+
 
 ---
 
