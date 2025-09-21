@@ -1,0 +1,122 @@
+version: '3.7'
+
+services:
+  bank-account:
+    image: markmatrix/bank-account:latest
+    mem_limit: 700m
+    ports:
+      - "8200:8200"
+    networks:
+      - currency-network
+    depends_on:
+      - naming-server
+    environment:
+      EUREKA.CLIENT.SERVICE-URL.DEFAULTZONE: http://naming-server:8761/eureka
+
+  trading-service:
+    image: markmatrix/trading-service:latest
+    mem_limit: 700m
+    ports:
+      - "8600:8600"
+    networks:
+      - currency-network
+    depends_on:
+      - naming-server
+    environment:
+      EUREKA.CLIENT.SERVICE-URL.DEFAULTZONE: http://naming-server:8761/eureka
+
+  currency-exchange:
+    image: markmatrix/currency-exchange:latest
+    mem_limit: 700m
+    ports:
+      - "8000:8000"
+    networks:
+      - currency-network
+    depends_on:
+      - naming-server
+    environment:
+      EUREKA.CLIENT.SERVICE-URL.DEFAULTZONE: http://naming-server:8761/eureka
+
+  currency-conversion:
+    image: markmatrix/currency-conversion:latest
+    mem_limit: 700m
+    ports:
+      - "8100:8100"
+    networks:
+      - currency-network
+    depends_on:
+      - naming-server
+    environment:
+      EUREKA.CLIENT.SERVICE-URL.DEFAULTZONE: http://naming-server:8761/eureka
+
+  users-service:
+    image: markmatrix/users-service:latest
+    mem_limit: 700m
+    ports:
+      - "8770:8770"
+    networks:
+      - currency-network
+    depends_on:
+      - naming-server
+    environment:
+      EUREKA.CLIENT.SERVICE-URL.DEFAULTZONE: http://naming-server:8761/eureka    
+
+  api-gateway:
+    image: markmatrix/api-gateway:latest
+    mem_limit: 700m
+    ports:
+      - "8765:8765"
+    networks:
+      - currency-network
+    depends_on:
+      - naming-server
+      - users-service
+    environment:
+      EUREKA.CLIENT.SERVICE-URL.DEFAULTZONE: http://naming-server:8761/eureka
+
+  naming-server:
+    image: markmatrix/naming-server:latest
+    mem_limit: 700m
+    ports:
+      - "8761:8761"
+    networks:
+      - currency-network  
+
+  crypto-wallet:
+    image: markmatrix/crypto-wallet:latest
+    mem_limit: 700m
+    ports:
+      - "8300:8300"
+    networks:
+      - currency-network
+    depends_on:
+      - naming-server
+    environment:
+      EUREKA.CLIENT.SERVICE-URL.DEFAULTZONE: http://naming-server:8761/eureka
+
+  crypto-exchange:
+    image: markmatrix/crypto-exchange:latest
+    mem_limit: 700m
+    ports:
+      - "8400:8400"
+    networks:
+      - currency-network
+    depends_on:
+      - naming-server
+    environment:
+      EUREKA.CLIENT.SERVICE-URL.DEFAULTZONE: http://naming-server:8761/eureka
+
+  crypto-conversion:
+    image: markmatrix/crypto-conversion:latest
+    mem_limit: 700m
+    ports:
+      - "8500:8500"
+    networks:
+      - currency-network
+    depends_on:
+      - naming-server
+    environment:
+      EUREKA.CLIENT.SERVICE-URL.DEFAULTZONE: http://naming-server:8761/eureka
+
+networks:
+  currency-network:

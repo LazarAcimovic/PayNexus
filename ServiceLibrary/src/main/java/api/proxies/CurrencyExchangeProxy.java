@@ -14,5 +14,5 @@ public interface CurrencyExchangeProxy {
 	// the endpoint, HTTP request type, and method parameters must match, but not the method name  
 	// likewise, we can say that we return currencyExchangeDTO instead of ?
 
-	ResponseEntity<CurrencyExchangeDto> getExchangeFeign(@RequestParam String from, @RequestParam String to);
+	ResponseEntity<CurrencyExchangeDto> getExchangeFeign(@RequestParam(value="from") String from, @RequestParam(value="to") String to);
 }

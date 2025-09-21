@@ -1,18 +1,21 @@
 package tradeService;
 
 import api.dtos.*;
-import api.proxies.*;
-import api.services.TradeService;
 
+import api.services.TradeService;
+import util.exceptions.InsufficientFundsException;
+import util.exceptions.InvalidCurrencyCombinationException;
+import util.exceptions.InvalidQuantityException;
+import util.exceptions.NoDataFoundException;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 
-import api.dtos.TradeRequestDto;
+
 import api.proxies.BankAccountProxy;
-import api.proxies.CryptoExchangeProxy;
+
 import api.proxies.CryptoWalletProxy;
 import api.proxies.CurrencyExchangeProxy;
 
@@ -33,9 +36,6 @@ public class TradeServiceImpl implements TradeService {
     @Autowired
     private CurrencyExchangeProxy currencyExchangeProxy;
 
-   /* @Autowired
-    private CryptoExchangeProxy cryptoExchangeProxy; //*/
-
     @Autowired
     private TradeExchangeRepository tradeExchangeRepository;
 
@@ -46,6 +46,10 @@ public class TradeServiceImpl implements TradeService {
     public ResponseEntity<?> trade(String from, String to, BigDecimal quantity, String userEmail) {
         from = from.toUpperCase();
         to = to.toUpperCase();
+        
+        if (quantity.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new InvalidQuantityException("Quantity must be a positive number.");
+        }
 
         boolean isFromFiat = FIAT_CURRENCIES.contains(from);
         boolean isToCrypto = CRYPTO_CURRENCIES.contains(to);
@@ -58,27 +62,28 @@ public class TradeServiceImpl implements TradeService {
             return exchangeCryptoToFiat(from, to, quantity, userEmail);
         }
 
-        return ResponseEntity.badRequest().body("Invalid currency combination for trade.");
+        // If the currency combination is not valid
+        throw new InvalidCurrencyCombinationException("Invalid currency combination for trade. Cannot trade from " + from + " to " + to);
     }
     
     private ResponseEntity<?> exchangeFiatToCrypto(String from, String to, BigDecimal quantity, String userEmail) {
-        // Korak 1: Dohvatanje bankovnog računa
+        // Getting account state
         ResponseEntity<BankAccountDto> bankAccountResponse = bankAccountProxy.getBankAccountByEmail(userEmail);
         if (!bankAccountResponse.getStatusCode().is2xxSuccessful()) {
-            return ResponseEntity.status(bankAccountResponse.getStatusCode()).body("Failed to get bank account details.");
+            throw new RuntimeException("Failed to get bank account details.");
         }
         BankAccountDto userBankAccount = bankAccountResponse.getBody();
         if (userBankAccount == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Bank account not found for user.");
+            throw new NoDataFoundException("Bank account not found for user.");
         }
         
-        // Provera stanja
+        // Checking state
         BigDecimal fiatFromAmount = getFiatAmount(userBankAccount, from);
         if (fiatFromAmount == null || fiatFromAmount.compareTo(quantity) < 0) {
-            return ResponseEntity.badRequest().body("Insufficient funds for exchange. Available " + from + ": " + fiatFromAmount);
+            throw new InsufficientFundsException("Insufficient funds for exchange. Available " + from + ": " + fiatFromAmount);
         }
 
-        // Korak 2: Provera valute
+        // Checking currency
         BigDecimal finalQuantityInBaseFiat;
         String baseFiatCurrency;
         
@@ -89,48 +94,44 @@ public class TradeServiceImpl implements TradeService {
             finalQuantityInBaseFiat = quantity;
             baseFiatCurrency = "USD";
         } else {
-            // Kaskadna konverzija RSD -> EUR -> EUR -> BTC (primer)
             ResponseEntity<CurrencyExchangeDto> conversionResponse = currencyExchangeProxy.getExchangeFeign(from, "EUR");
             if (!conversionResponse.getStatusCode().is2xxSuccessful()) {
-                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to get currency exchange rate for fiat conversion.");
+                throw new RuntimeException("Failed to get currency exchange rate for fiat conversion.");
             }
             BigDecimal conversionRate = conversionResponse.getBody().getExchangeRate();
             finalQuantityInBaseFiat = quantity.multiply(conversionRate);
-            baseFiatCurrency = "EUR"; // fali i za dolar posle, ovo je za eur samo (opciono)
+            baseFiatCurrency = "EUR"; 
         }
 
-        // Korak 3: Dohvatanje kursa i izračunavanje kripto količine
+        // Dobijanje kursa
         TradeExchangeModel tradeExchange = tradeExchangeRepository.findByFromAndTo(baseFiatCurrency, to);
         if (tradeExchange == null) {
-            return ResponseEntity.badRequest().body("Exchange rate not found for " + baseFiatCurrency + " to " + to);
+            throw new NoDataFoundException("Exchange rate not found for " + baseFiatCurrency + " to " + to);
         }
-       // System.out.println(finalQuantityInBaseFiat); //100
-        //System.out.println(tradeExchange.getExchangeRate()); //0.00
-        BigDecimal cryptoAmount = finalQuantityInBaseFiat.multiply(tradeExchange.getExchangeRate());
-        //System.out.println(cryptoAmount);
 
-        // Korak 4: Ažuriranje bankovnog računa
+        BigDecimal cryptoAmount = finalQuantityInBaseFiat.multiply(tradeExchange.getExchangeRate());
+
+        // Updating account state
         BigDecimal newFromAmount = fiatFromAmount.subtract(quantity);
         setFiatAmount(userBankAccount, from, newFromAmount);
         bankAccountProxy.updateUserBankAccountByEmail(userBankAccount, userEmail);
 
-        // Korak 5: Dohvatanje i ažuriranje kripto novčanika
+
+        // Getting and updating crypto wallet
         ResponseEntity<CryptoWalletDto> cryptoWalletResponse = cryptoWalletProxy.getCryptoWalletByEmail(userEmail);
         if (!cryptoWalletResponse.getStatusCode().is2xxSuccessful()) {
-            return ResponseEntity.status(cryptoWalletResponse.getStatusCode()).body("Failed to get crypto wallet details.");
+            throw new RuntimeException("Failed to get crypto wallet details.");
         }
         CryptoWalletDto userCryptoWallet = cryptoWalletResponse.getBody();
         if (userCryptoWallet == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Crypto wallet not found for user.");
+            throw new NoDataFoundException("Crypto wallet not found for user.");
         }
         
         BigDecimal currentCryptoAmount = getCryptoAmount(userCryptoWallet, to);
         BigDecimal newCryptoAmount = (currentCryptoAmount != null ? currentCryptoAmount : BigDecimal.ZERO).add(cryptoAmount);
-        //System.out.println(newCryptoAmount);
         setCryptoAmount(userCryptoWallet, to, newCryptoAmount);
         cryptoWalletProxy.updateCryptoWallet(userCryptoWallet);
 
-        // Korak 6: Priprema odgovora
         String message = String.format("Successful transaction: Exchanged %s: %s for %s: %s",
                 from, quantity, to, cryptoAmount.setScale(8, RoundingMode.HALF_UP));
 
@@ -139,69 +140,66 @@ public class TradeServiceImpl implements TradeService {
     }
     
     private ResponseEntity<?> exchangeCryptoToFiat(String from, String to, BigDecimal quantity, String userEmail) {
-        // Korak 1: Dohvatanje kripto novčanika
+        // Getting crypto wallet
         ResponseEntity<CryptoWalletDto> cryptoWalletResponse = cryptoWalletProxy.getCryptoWalletByEmail(userEmail);
         if (!cryptoWalletResponse.getStatusCode().is2xxSuccessful()) {
-            return ResponseEntity.status(cryptoWalletResponse.getStatusCode()).body("Failed to get crypto wallet details.");
+            throw new RuntimeException("Failed to get crypto wallet details.");
         }
         CryptoWalletDto userCryptoWallet = cryptoWalletResponse.getBody();
         if (userCryptoWallet == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Crypto wallet not found for user.");
+            throw new NoDataFoundException("Crypto wallet not found for user.");
         }
 
-        // Provera stanja
+        // Checkign state of an account
         BigDecimal cryptoFromAmount = getCryptoAmount(userCryptoWallet, from);
         if (cryptoFromAmount == null || cryptoFromAmount.compareTo(quantity) < 0) {
-            return ResponseEntity.badRequest().body("Insufficient funds for exchange. Available " + from + ": " + cryptoFromAmount);
+            throw new InsufficientFundsException("Insufficient funds for exchange. Available " + from + ": " + cryptoFromAmount);
         }
 
-        // Korak 2: Konverzija u EUR ili USD
+       
         TradeExchangeModel tradeExchange;
         String baseFiatCurrency;
         
-        // Specifikacija zahteva konverziju u USD ili EUR pre nego što se pređe na drugu fiat valutu.
-        // Odabraćemo EUR kao osnovnu fiat valutu za posrednu konverziju.
         tradeExchange = tradeExchangeRepository.findByFromAndTo(from, "EUR");
         baseFiatCurrency = "EUR";
 
         if (tradeExchange == null) {
-            // Ako kurs za EUR nije pronađen, pokušajte sa USD
             tradeExchange = tradeExchangeRepository.findByFromAndTo(from, "USD");
             baseFiatCurrency = "USD";
         }
         
         if (tradeExchange == null) {
-            return ResponseEntity.badRequest().body("Exchange rate not found for " + from + " to " + to);
+            throw new NoDataFoundException("Exchange rate not found for " + from + " to " + baseFiatCurrency);
         }
         
         BigDecimal quantityInBaseFiat = quantity.multiply(tradeExchange.getExchangeRate());
         BigDecimal finalFiatAmount;
         
-        // Korak 3: Kaskadna konverzija u željenu fiat valutu (ako je potrebno)
+        // if some other currency is present
         if (to.equals("EUR") || to.equals("USD")) {
             finalFiatAmount = quantityInBaseFiat; 
-        } else {															
+        } else {                                                      
             ResponseEntity<CurrencyExchangeDto> conversionResponse = currencyExchangeProxy.getExchangeFeign(baseFiatCurrency, to);
             if (!conversionResponse.getStatusCode().is2xxSuccessful()) {
-                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to get currency exchange rate for fiat conversion.");
+                throw new RuntimeException("Failed to get currency exchange rate for fiat conversion.");
             }
             BigDecimal conversionRate = conversionResponse.getBody().getExchangeRate();
             finalFiatAmount = quantityInBaseFiat.multiply(conversionRate);
         }
         
-        // Korak 4: Ažuriranje kripto novčanika
+        // Updating crypto wallet
         BigDecimal newCryptoAmount = cryptoFromAmount.subtract(quantity);
         setCryptoAmount(userCryptoWallet, from, newCryptoAmount);
         cryptoWalletProxy.updateCryptoWallet(userCryptoWallet);
         
-        // Korak 5: Dohvatanje i ažuriranje bankovnog računa
+        //again, getting and updating account state
         ResponseEntity<BankAccountDto> bankAccountResponse = bankAccountProxy.getBankAccountByEmail(userEmail);
         if (!bankAccountResponse.getStatusCode().is2xxSuccessful()) {
-            return ResponseEntity.status(bankAccountResponse.getStatusCode()).body("Failed to get bank account details.");
+            throw new RuntimeException("Failed to get bank account details.");
         }
         BankAccountDto userBankAccount = bankAccountResponse.getBody();
         if (userBankAccount == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Bank account not found for user.");
+            throw new NoDataFoundException("Bank account not found for user.");
         }
         
         BigDecimal currentFiatAmount = getFiatAmount(userBankAccount, to);
@@ -209,7 +207,6 @@ public class TradeServiceImpl implements TradeService {
         setFiatAmount(userBankAccount, to, newFiatAmount);
         bankAccountProxy.updateUserBankAccountByEmail(userBankAccount, userEmail);
         
-        // Korak 6: Priprema odgovora
         String message = String.format("Successful transaction: Exchanged %s: %s for %s: %s",
                 from, quantity.setScale(8, RoundingMode.HALF_UP), to, finalFiatAmount);
 
@@ -217,7 +214,7 @@ public class TradeServiceImpl implements TradeService {
         return ResponseEntity.ok(responseDto);
     }
     
-    // Utility metode
+    // Helper methods
     private BigDecimal getFiatAmount(BankAccountDto dto, String currency) {
         return switch (currency.toUpperCase()) {
             case "USD" -> dto.getUsd();
@@ -225,7 +222,7 @@ public class TradeServiceImpl implements TradeService {
             case "RSD" -> dto.getRsd();
             case "GBP" -> dto.getGbp();
             case "CHF" -> dto.getChf();
-            default -> null;
+            default -> null; // We don't throw an exception because this is used for retrieving the amount, not for validation
         };
     }
 
@@ -245,7 +242,7 @@ public class TradeServiceImpl implements TradeService {
             case "ETH" -> dto.getETH();
             case "LTC" -> dto.getLTC();
             case "XRP" -> dto.getXRP();
-            default -> null;
+            default -> null; 
         };
     }
 

@@ -11,7 +11,7 @@ import api.dtos.CryptoExchangeDto;
 public interface CryptoExchangeProxy {
     @GetMapping("/crypto-exchange")
     ResponseEntity<CryptoExchangeDto> getExchangeRate(
-        @RequestParam String from,
-        @RequestParam String to
+        @RequestParam(value="from") String from,
+        @RequestParam(value="to") String to
     );
 }

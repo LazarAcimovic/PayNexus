@@ -4,3 +4,6 @@ INSERT INTO crypto_exchange (id, currency_from, currency_to, exchange_rate) VALU
 INSERT INTO crypto_exchange (id, currency_from, currency_to, exchange_rate) VALUES (4, 'LTC', 'BTC', 0.0055);
 INSERT INTO crypto_exchange (id, currency_from, currency_to, exchange_rate) VALUES (5, 'ETH', 'LTC', 12.0);
 INSERT INTO crypto_exchange (id, currency_from, currency_to, exchange_rate) VALUES (6, 'LTC', 'ETH', 0.083);
+
+
+

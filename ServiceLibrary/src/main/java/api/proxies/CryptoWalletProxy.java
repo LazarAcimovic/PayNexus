@@ -21,7 +21,7 @@ public interface CryptoWalletProxy {
     ResponseEntity<?> createCryptoWallet(@RequestBody CryptoWalletDto dto);
 
     @DeleteMapping("/crypto-wallets/delete")
-    ResponseEntity<?> deleteCryptoWallet(@RequestParam String email);
+    ResponseEntity<?> deleteCryptoWallet(@RequestParam(value="email") String email);
     
     @GetMapping("/crypto-wallets/email")
     ResponseEntity<CryptoWalletDto> getCryptoWalletByEmail(@RequestHeader("X-User-Email") String userEmail);

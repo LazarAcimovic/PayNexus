@@ -19,7 +19,7 @@ public interface BankAccountProxy {
     ResponseEntity<?> createBankAccount(@RequestBody BankAccountDto dto);
 
     @DeleteMapping("/bank-accounts/delete")
-    ResponseEntity<?> deleteBankAccount(@RequestParam String email);
+    ResponseEntity<?> deleteBankAccount(@RequestParam(value="email") String email);
     
     @PutMapping("/bank-accounts/update/user")
     ResponseEntity<BankAccountDto> updateUserBankAccountByEmail(

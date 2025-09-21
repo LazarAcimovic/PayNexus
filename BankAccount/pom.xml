@@ -37,18 +37,25 @@
 		</dependency>
 		
 		<dependency>
+				<groupId>soas.util</groupId>
+				<artifactId>util</artifactId>
+				<version>1.0.0</version>
+		</dependency>
+		
+		<dependency>
 			<groupId>soas.service-library</groupId>
 			<artifactId>service-library</artifactId>
 			<version>1.0.0</version>
 		</dependency>
 		<dependency>
-		<dependency>
-   		   <groupId>org.springframework.cloud</groupId>
-    	   <artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
-           <version>4.3.0</version>
+		    <groupId>org.springframework.boot</groupId>
+		    <artifactId>spring-boot-starter-web</artifactId>
 		</dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-web</artifactId>
+		
+		<dependency>
+		    <groupId>org.springframework.cloud</groupId>
+		    <artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
+		
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.cloud</groupId>

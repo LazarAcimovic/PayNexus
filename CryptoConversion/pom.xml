@@ -37,6 +37,12 @@
 				<version>1.0.0</version>
 		</dependency>
 		
+		<dependency>
+				<groupId>soas.util</groupId>
+				<artifactId>util</artifactId>
+				<version>1.0.0</version>
+		</dependency>
+		
 		<!-- Actuator za health/endpoints -->
 <dependency>
     <groupId>org.springframework.boot</groupId>

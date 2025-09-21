@@ -1,6 +1,8 @@
 package cryptoConversion;
 
 import java.math.BigDecimal;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,6 +18,10 @@ import api.services.CryptoConversionService;
 
 import io.github.resilience4j.circuitbreaker.CallNotPermittedException;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import util.exceptions.CurrencyDoesntExistException;
+import util.exceptions.InsufficientFundsException;
+import util.exceptions.InvalidQuantityException;
+import util.exceptions.NoDataFoundException;
 
 @RestController
 public class CryptoConversionServiceImpl implements CryptoConversionService {
@@ -34,52 +40,53 @@ public class CryptoConversionServiceImpl implements CryptoConversionService {
         BigDecimal quantity,
         String userEmail
     ) {
-        // Korak 1: Provera stanja u novčaniku
+    	
+		if(quantity.compareTo(BigDecimal.valueOf(300.0)) == 1) {
+			throw new InvalidQuantityException(String.format("Quantity of %s is too large", quantity));
+		}
+        // CHecking account state
         ResponseEntity<CryptoWalletDto> walletResponse = cryptoWalletProxy.getCryptoWalletByEmail(userEmail);
 
         if (!walletResponse.getStatusCode().is2xxSuccessful()) {
-            return ResponseEntity.status(walletResponse.getStatusCode()).body("Failed to get crypto wallet details.");
+        	throw new NoDataFoundException("Crypto wallet not found for user.");
         }
 
         CryptoWalletDto userWallet = walletResponse.getBody();
 
         if (userWallet == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Crypto wallet not found for user.");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Crypto wallet details not found for user.");
         }
 
         BigDecimal fromAmount = getCurrencyAmount(userWallet, from);
 
         if (fromAmount == null || fromAmount.compareTo(quantity) < 0) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
-                "Insufficient funds for exchange. Available " + from + ": " + fromAmount
-            );
+        	throw new InsufficientFundsException("Insufficient funds for exchange. Available " + from + ": " + fromAmount);
+
         }
 
-        // Korak 2: Dohvatanje kursa razmene
+        // Getting exchange rate
         ResponseEntity<CryptoExchangeDto> exchangeResponse = cryptoExchangeProxy.getExchangeRate(from, to);
 
         if (!exchangeResponse.getStatusCode().is2xxSuccessful()) {
-            return ResponseEntity.status(exchangeResponse.getStatusCode()).body("Failed to get exchange rate.");
+        	throw new RuntimeException("Failed to get exchange rate.");
         }
 
         CryptoExchangeDto exchangeDto = exchangeResponse.getBody();
         BigDecimal conversionRate = exchangeDto.getExchangeRate();
 
-        // Korak 3: Izračunavanje novih vrednosti
         BigDecimal newFromAmount = fromAmount.subtract(quantity);
         BigDecimal convertedToAmount = quantity.multiply(conversionRate);
         BigDecimal toAmount = getCurrencyAmount(userWallet, to);
         BigDecimal newToAmount = toAmount.add(convertedToAmount);
 
-        // Korak 4: Ažuriranje novčanika
+        // Updating account
         setCurrencyAmount(userWallet, from, newFromAmount);
         setCurrencyAmount(userWallet, to, newToAmount);
 
         ResponseEntity<OperationResponseDto> updateResponse = cryptoWalletProxy.updateCryptoWallet(userWallet);
 
         if (!updateResponse.getStatusCode().is2xxSuccessful()) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body("Failed to update crypto wallet. Transaction rolled back.");
+        	throw new RuntimeException("Failed to update crypto wallet. Transaction not completed.");
         }
 
         
@@ -104,12 +111,18 @@ public class CryptoConversionServiceImpl implements CryptoConversionService {
     }
 
     private BigDecimal getCurrencyAmount(CryptoWalletDto dto, String currency) {
+    	List<String> supportedCurrencies = List.of("BTC", "ETH", "XRP", "LTC");
         return switch (currency.toUpperCase()) {
             case "BTC" -> dto.getBTC();
             case "ETH" -> dto.getETH();
             case "XRP" -> dto.getXRP();
             case "LTC" -> dto.getLTC();
-            default -> null;
+            default -> {
+                throw new CurrencyDoesntExistException(
+                    "Currency '" + currency + "' doesn't exist.",
+                    supportedCurrencies
+                );
+            }
         };
     }
 

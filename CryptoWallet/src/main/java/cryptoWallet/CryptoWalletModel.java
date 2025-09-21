@@ -23,31 +23,29 @@ public class CryptoWalletModel implements Serializable {
     @Column(unique = true, nullable = false)
     private String email;
 
-    @Column
-    private BigDecimal btc;
-    
-    @Column
-    private BigDecimal eth;
-    
-    @Column
-    private BigDecimal xrp;
-    
-    @Column
-    private BigDecimal ltc;
-    
-    public CryptoWalletModel() {
-        this.btc = BigDecimal.ZERO;
-        this.eth = BigDecimal.ZERO;
-        this.xrp = BigDecimal.ZERO;
-        this.ltc = BigDecimal.ZERO;
-    }
+    @Column(precision = 19, scale = 8)
+    private BigDecimal BTC;
 
+    @Column(precision = 19, scale = 8)
+    private BigDecimal ETH;
+
+    @Column(precision = 19, scale = 8)
+    private BigDecimal XRP;
+
+    @Column(precision = 19, scale = 8)
+    private BigDecimal LTC;
+
+    public CryptoWalletModel() {
+        this.BTC = BigDecimal.ZERO;
+        this.ETH = BigDecimal.ZERO;
+        this.XRP = BigDecimal.ZERO;
+        this.LTC = BigDecimal.ZERO;
+    }
 
     public CryptoWalletModel(String email) {
         this();
         this.email = email;
     }
-    
 
     public int getId() {
         return id;
@@ -65,35 +63,35 @@ public class CryptoWalletModel implements Serializable {
         this.email = email;
     }
 
-    public BigDecimal getBtc() {
-        return btc;
+    public BigDecimal getBTC() {
+        return BTC;
     }
 
-    public void setBtc(BigDecimal btc) {
-        this.btc = btc;
+    public void setBTC(BigDecimal BTC) {
+        this.BTC = BTC;
     }
 
-    public BigDecimal getEth() {
-        return eth;
+    public BigDecimal getETH() {
+        return ETH;
     }
 
-    public void setEth(BigDecimal eth) {
-        this.eth = eth;
+    public void setETH(BigDecimal ETH) {
+        this.ETH = ETH;
     }
 
-    public BigDecimal getXrp() {
-        return xrp;
+    public BigDecimal getXRP() {
+        return XRP;
     }
 
-    public void setXrp(BigDecimal xrp) {
-        this.xrp = xrp;
+    public void setXRP(BigDecimal XRP) {
+        this.XRP = XRP;
     }
 
-    public BigDecimal getLtc() {
-        return ltc;
+    public BigDecimal getLTC() {
+        return LTC;
     }
 
-    public void setLtc(BigDecimal ltc) {
-        this.ltc = ltc;
+    public void setLTC(BigDecimal LTC) {
+        this.LTC = LTC;
     }
 }

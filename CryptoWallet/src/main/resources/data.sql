@@ -1,0 +1,2 @@
+INSERT INTO crypto_wallet (email, BTC, ETH, XRP, LTC)
+VALUES ('user@uns.ac.rs', 100.00000000, 100.00000000, 100.00000000, 100.00000000);

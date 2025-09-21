@@ -1,6 +1,7 @@
 package cryptoExchange;
 
-import java.math.BigDecimal;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -8,6 +9,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import api.dtos.CryptoExchangeDto;
 import api.services.CryptoExchangeService;
+import util.exceptions.CurrencyDoesntExistException;
+import util.exceptions.NoDataFoundException;
 
 
 @RestController
@@ -18,11 +21,11 @@ public class CryptoExchangeServiceImpl implements CryptoExchangeService {
 
     @Override
     public ResponseEntity<?> getCryptoExchange(String from, String to) {
-        CryptoExchangeModel exchange = repo.findByFromAndTo(from, to);
+    	validateCurrencies(from.toUpperCase(), to.toUpperCase());
+        CryptoExchangeModel exchange = repo.findByFromAndTo(from.toUpperCase(), to.toUpperCase());
         
         if (exchange == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .body("Exchange rate not found for " + from + " to " + to);
+            throw new NoDataFoundException("Exchange rate not found for " + from.toUpperCase() + " to " + to.toUpperCase(), List.of(from.toUpperCase(), to.toUpperCase()));
         }
         
         CryptoExchangeDto dto = new CryptoExchangeDto(
@@ -32,5 +35,14 @@ public class CryptoExchangeServiceImpl implements CryptoExchangeService {
         );
         
         return ResponseEntity.ok(dto);
+    }
+    
+    private void validateCurrencies(String... currencies) {
+        List<String> supportedCurrencies = List.of("BTC", "ETH", "LTC");
+        for (String currency : currencies) {
+            if (!supportedCurrencies.contains(currency.toUpperCase())) {
+                throw new CurrencyDoesntExistException("Currency '" + currency + "' doesn't exist.", supportedCurrencies);
+            }
+        }
     }
 }

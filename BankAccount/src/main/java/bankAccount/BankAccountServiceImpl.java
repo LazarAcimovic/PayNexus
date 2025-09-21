@@ -12,7 +12,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import api.dtos.BankAccountDto;
 import api.dtos.OperationResponseDto;
+import api.dtos.UserDto;
+import api.proxies.UserProxy;
 import api.services.BankAccountService;
+import util.exceptions.ConflictException;
+import util.exceptions.NoDataFoundException;
 
 
 @RequestMapping("/bank-accounts")
@@ -22,32 +26,42 @@ public class BankAccountServiceImpl implements BankAccountService {
 	@Autowired
 	private BankAccountRepository repo;
 	
-	@Override
-	public ResponseEntity<?> createBankAccount(BankAccountDto dto) {
-		if (repo.findByEmail(dto.getEmail()) != null) {
-			return ResponseEntity.status(HttpStatus.CONFLICT).body("Bank account for this user already exists.");
-		}
-		
-		BankAccountModel newAccount = new BankAccountModel(
-			dto.getEmail(),
-			BigDecimal.ZERO,
-			BigDecimal.ZERO,
-			BigDecimal.ZERO,
-			BigDecimal.ZERO,
-			BigDecimal.ZERO
-		);
-		
-		repo.save(newAccount);
-		return ResponseEntity.status(HttpStatus.CREATED).body(newAccount);
-	}
+    @Autowired
+    private UserProxy usersProxy;
+	
+    @Override
+    public ResponseEntity<?> createBankAccount(BankAccountDto dto) {
+        
+
+        ResponseEntity<UserDto> userResponse = usersProxy.getUserByEmail(dto.getEmail());
+        
+        if (!userResponse.getStatusCode().is2xxSuccessful() || userResponse.getBody() == null) {
+            throw new NoDataFoundException("User with email " + dto.getEmail() + " not found.");
+        }
+
+        if (repo.findByEmail(dto.getEmail()) != null) {
+            throw new ConflictException("Bank account for this user already exists.");
+        }
+        
+        BankAccountModel newAccount = new BankAccountModel(
+            dto.getEmail(),
+            BigDecimal.ZERO,
+            BigDecimal.ZERO,
+            BigDecimal.ZERO,
+            BigDecimal.ZERO,
+            BigDecimal.ZERO
+        );
+        
+        repo.save(newAccount);
+        return ResponseEntity.status(HttpStatus.CREATED).body(newAccount);
+    }
+
 	
 	@Override
 	public ResponseEntity<?> deleteBankAccount(String email) {
 		BankAccountModel account = repo.findByEmail(email);
 		if (account == null) {
-		    return ResponseEntity
-		        .status(HttpStatus.NOT_FOUND)
-		        .body(new OperationResponseDto("Bank account for this user does not exist."));
+			throw new NoDataFoundException("Bank account for this user does not exist.", null);
 		}
 		
 		repo.deleteByEmail(email);
@@ -70,8 +84,7 @@ public class BankAccountServiceImpl implements BankAccountService {
     public ResponseEntity<?> updateBankAccount(@RequestBody BankAccountDto dto) {
         BankAccountModel existingAccount = repo.findByEmail(dto.getEmail());
         if (existingAccount == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .body("Bank account for user with email " + dto.getEmail() + " does not exist.");
+        	throw new NoDataFoundException("Bank account for user with email " + dto.getEmail() + " does not exist.", null);
         }
         
 
@@ -90,9 +103,31 @@ public class BankAccountServiceImpl implements BankAccountService {
         
         BankAccountModel model = repo.findByEmail(userEmail);
         if (model == null) {
-            return null; 
+        	throw new NoDataFoundException("Bank account not found for user: " + userEmail, null);
         }
         return convertModelToDto(model);
+    }
+    
+    @Override
+    public ResponseEntity<?> updateUserBankAccountByEmail(BankAccountDto dto, String userEmail) {
+    	// Check if the email in the DTO matches the email from the header
+        if (!dto.getEmail().equals(userEmail)) {
+        	throw new RuntimeException("You can only update your own bank account.");
+        }
+
+        BankAccountModel existingAccount = repo.findByEmail(dto.getEmail());
+        if (existingAccount == null) {
+        	throw new NoDataFoundException("Bank account for user with email " + dto.getEmail() + " does not exist.", null);
+        }
+
+        existingAccount.setUsd(dto.getUsd());
+        existingAccount.setEur(dto.getEur());
+        existingAccount.setGbp(dto.getGbp());
+        existingAccount.setChf(dto.getChf());
+        existingAccount.setRsd(dto.getRsd());
+
+        repo.save(existingAccount);
+        return ResponseEntity.ok(convertModelToDto(existingAccount));
     }
 	
 	private BankAccountDto convertModelToDto(BankAccountModel model) {
