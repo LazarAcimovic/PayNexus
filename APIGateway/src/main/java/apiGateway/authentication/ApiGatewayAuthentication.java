@@ -29,7 +29,7 @@ public class ApiGatewayAuthentication {
 				.pathMatchers("/bank-accounts/delete").hasRole("OWNER")  //we're allowing owner because when deleting user, it automatically needs to delete user account as well
 				.pathMatchers("/bank-accounts/new").hasRole("ADMIN")
 				.pathMatchers("/bank-accounts/update").hasRole("ADMIN")
-				.pathMatchers("/bank-accounts/update/user").hasRole("USER")
+				.pathMatchers("/bank-accounts/update/user").hasRole("ADMIN")
 				
 				//.pathMatchers(HttpMethod.POST, "/users/newOwner").permitAll() for testing purposes
 				.pathMatchers(HttpMethod.POST, "/users/newAdmin").hasRole("OWNER")
@@ -68,10 +68,10 @@ public class ApiGatewayAuthentication {
 	
 	@Bean
 	ReactiveUserDetailsService reactiveUserDetailsService(WebClient.Builder webClientBuilder, BCryptPasswordEncoder encoder) {
-	   // WebClient client = webClientBuilder.baseUrl("http://localhost:8770").build();
+	    WebClient client = webClientBuilder.baseUrl("http://localhost:8770").build();
 		
 		//for docker purposes
-		WebClient client = webClientBuilder.baseUrl("http://users-service:8770").build();
+		//WebClient client = webClientBuilder.baseUrl("http://users-service:8770").build();
 	    
 	    return user -> client.get()
 	            .uri(uriBuilder -> uriBuilder
@@ -80,8 +80,8 @@ public class ApiGatewayAuthentication {
 	                    .build()
 	            )
 	            .retrieve()
-	            .bodyToMono(UserDto.class)
-	            .map(dto -> User.withUsername(dto.getEmail())
+	            .bodyToMono(UserDto.class) //.map... transformiše UserDto u UserDetails
+	            .map(dto -> User.withUsername(dto.getEmail()) //creating Spring security object
 	                    .password(encoder.encode(dto.getPassword())) // zatvorena zagrada ovde
 	                    .roles(dto.getRole())
 	                    .build()

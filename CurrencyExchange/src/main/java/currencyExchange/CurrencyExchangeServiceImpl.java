@@ -26,15 +26,15 @@ public class CurrencyExchangeServiceImpl implements CurrencyExchangeService{
 		String missingCurrency = null;
 		List<String> validCurrencies = repo.findAllDistinctCurrencis();
 //		proveriti da li from parametar odgovara nekoj valuti
-		if(!isValidCurrency(from)) missingCurrency = from;
+		if(!isValidCurrency(from.toUpperCase())) missingCurrency = from;
 //		proveriti da li to parametar odgovara nekoj valuti
-		else if(!isValidCurrency(to)) missingCurrency = to;
+		else if(!isValidCurrency(to.toUpperCase())) missingCurrency = to;
 //		provera da li je missingCurrency razlicit od null i ako jeste bacanje domain exception-a
 		if(missingCurrency != null) throw new 
 		CurrencyDoesntExistException(String.format("Currency %s does not exist in the database", missingCurrency),
 				validCurrencies);
 		
-		CurrencyExchangeModel dbResponse  = repo.findByFromAndTo(from, to);
+		CurrencyExchangeModel dbResponse  = repo.findByFromAndTo(from.toUpperCase(), to.toUpperCase());
 		
 		if(dbResponse == null) {
 			throw new NoDataFoundException(String.format("Requested exchange rate [%s to %s] does not exist", from,to),

@@ -1,5 +1,7 @@
 
 package apiGateway.authentication;
+//map Koristi se za transformaciju vrednosti unutar Mono/Flux-a.
+//Koristi se kada tvoja transformacija već vraća Mono/Flux.
 
 import java.util.stream.Collectors;
 
@@ -14,8 +16,8 @@ public class AddUserRoleHeaderWebFilter implements org.springframework.web.serve
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
-        return ReactiveSecurityContextHolder.getContext()
-                .map(context -> context.getAuthentication())
+        return ReactiveSecurityContextHolder.getContext() //Mono<SecurityContext>
+                .map(context -> context.getAuthentication()) //posle map: Mono<Authentication>
                 .filter(Authentication::isAuthenticated)
                 .flatMap(authentication -> {
                     String roles = authentication.getAuthorities().stream()
@@ -25,13 +27,13 @@ public class AddUserRoleHeaderWebFilter implements org.springframework.web.serve
                     String email = authentication.getName(); 
                     
                     ServerWebExchange mutatedExchange = exchange.mutate()
-                            .request(exchange.getRequest().mutate()
+                            .request(exchange.getRequest().mutate() //modifying request
                                     .header("X-User-Roles", roles)
                                     .header("X-User-Email", email) 
                                     .build())
                             .build();
 
-                    return chain.filter(mutatedExchange);
+                    return chain.filter(mutatedExchange); //prosleđuje se dalje u lanac filtera
                 })
                 .switchIfEmpty(chain.filter(exchange));
     }

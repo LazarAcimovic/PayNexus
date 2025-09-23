@@ -1,6 +1,7 @@
 package currencyConversion;
 
 import java.math.BigDecimal;
+import api.dtos.ConversionResponseDto;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -95,12 +96,15 @@ public class CurrencyConversionServiceImpl implements CurrencyConversionService 
 
 	    
 	    bankAccountProxy.updateUserBankAccountByEmail(userAccount, userEmail);
+	    
+        ResponseEntity<BankAccountDto> updatedAccountResponse = bankAccountProxy.getBankAccountByEmail(userEmail);
+        BankAccountDto updatedAccountDto = updatedAccountResponse.getBody();
 
 	   
 	    String message = String.format("Successful transaction: Exchanged %s: %s for %s: %s",
 	        from.toUpperCase(), quantity, to, convertedToAmount);
 
-	    return ResponseEntity.ok(message);
+	     return ResponseEntity.ok(new ConversionResponseDto(message, updatedAccountDto));
 	}
 	
 	@Override
