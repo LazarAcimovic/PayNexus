@@ -18,12 +18,12 @@ PayNexus is a backend application, microservices-based, which faciliates the exc
 ## Prerequisites for running the app
 Docker desktop is installed
 
-## 1 Start all services
+## 1. Start all services
 Navigate to the folder containing `docker-compose.yaml` and run:
 
 bash docker-compose up -d
 
-## 2 Test the application via postman or other softvare
+## 2. Test the application via postman or other softvare
 All endpoints are listed in Update API Documentation.md file
 
 
