@@ -15,9 +15,7 @@ PayNexus is a backend application, microservices-based, which faciliates the exc
 - Fault-tolerant (Chaos monkey, retry and circuit breaker) microservices architecture, powered by Spring Boot and H2 in-memory databases.
 - Containerized deployment using Docker and orchestration via Docker Compose.
 
-## Running the app
-
-## Prerequisites
+## Prerequisites for running the app
 Docker desktop is installed
 
 ## 1 Start all services
