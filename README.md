@@ -26,4 +26,8 @@ Navigate to the folder containing `docker-compose.yaml` and run:
 bash docker-compose up -d
 
 ## 2 Test the application via postman or other softvare
-All endpoints are listed in 
+All endpoints are listed in Update API Documentation.md file
+
+
+## 3. Stop all services
+docker-compose down
